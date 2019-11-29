@@ -4,10 +4,14 @@
 # environment variable, and use semicolon to separate them. This script
 # will catch all SUNKAISENS_ prefix environment variable and match it
 # in configuration files. e.g. 'SUNKAISENS_HELLO__ZHANG_XIANG_LONG' will
-# be converted to 'hello.zhang_xiang_long'.
+# be converted to 'hello.zhang_xiang_long'. Borrowed from the emqx's
+# docker-entrypoint.sh.
 #
-# Borrowed from the emqx's docker-entrypoint.sh.
-# ZhangXiangLong <zhangxianglong@sunkaisens.com>
+# In addition, you can add services that you want wait for to the WAIT_FOR_SERVICE
+# environment variable, such as database service. This script will wait
+# for these services until they are available.
+#
+# ZhangXiangLong <819171011@qq.com>
 
 set -eo pipefail
 
@@ -31,7 +35,7 @@ for var in $(env); do
         var_full_name=$(echo "$var" | sed -r "s/([^=]*)=.*/\1/g")
 
         for file in ${file_array[@]}; do
-            if [[ -f $file && -n "$(cat $file | grep -E "^(^|^#*|^#*\s*)$var_name")" ]]; then
+            if [[ -n "$(cat $file | grep -E "^(^|^#*|^#*\s*)$var_name")" ]]; then
                 echo "$var_name=$(eval echo \$$var_full_name)"
                 echo "$(sed -r "s/(^#*\s*)($var_name)\s*=\s*(.*)/\2=$(eval echo \$$var_full_name | sed -e 's/\//\\\//g')/g" $file)" > $file
             fi
@@ -41,13 +45,10 @@ done
 
 # https://docs.docker.com/compose/startup-order/
 # https://github.com/vishnubob/wait-for-it
-if [[ -z "$WAIT_FOR_TIMEOUT" ]]; then
-    WAIT_FOR_TIMEOUT=0
-fi
 if [[ -n "$WAIT_FOR_SERVICE" ]]; then
     serv_array=(${WAIT_FOR_SERVICE//;/ })
     for serv in ${serv_array[@]}; do
-        ./wait-for-it.sh -t $WAIT_FOR_TIMEOUT $serv
+        ./wait-for-it.sh -t 0 $serv
     done
 fi
 

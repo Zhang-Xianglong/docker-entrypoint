@@ -1,2 +1,2 @@
 # docker-entrypoint
-Generic docker-entrypoint.sh for Docker.
+Generic docker-entrypoint.sh.
