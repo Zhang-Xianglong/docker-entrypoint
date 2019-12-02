@@ -9,6 +9,9 @@
 # be converted to 'hello.zhangXiangLong'. Borrowed from the emqx's
 # docker-entrypoint.sh.
 #
+# VAR_SEPARATOR environment variable is used to separate the name and
+# value of variables, we use '=' by default, you can also use ':'.
+#
 # In addition, you can add services that you want wait for to the WAIT_FOR_SERVICE
 # environment variable, such as database service. This script will wait
 # for these services until they are available.
@@ -16,6 +19,16 @@
 # ZhangXiangLong <819171011@qq.com>
 
 set -eo pipefail
+
+case $VAR_SEPARATOR in
+:)
+    ;;
+=)
+    ;;
+*)
+    VAR_SEPARATOR="="
+    ;;
+esac
 
 array=(${CONFIG//;/ })
 for path in ${array[@]}; do
@@ -47,8 +60,8 @@ for var in $(env); do
 
         for file in ${file_array[@]}; do
             if [[ -n "$(cat $file | grep -E "^(^|^#*|^#*\s*)$var_name")" ]]; then
-                echo "$var_name=$(eval echo \$$var_full_name)"
-                echo "$(sed -r "s/(^#*\s*)($var_name)\s*=\s*(.*)/\2=$(eval echo \$$var_full_name | sed -e 's/\//\\\//g')/g" $file)" > $file
+                echo "$var_name${VAR_SEPARATOR}$(eval echo \$$var_full_name)"
+                echo "$(sed -r "s/(^#*\s*)($var_name)\s*${VAR_SEPARATOR}\s*(.*)/\2${VAR_SEPARATOR}$(eval echo \$$var_full_name | sed -e 's/\//\\\//g')/g" $file)" > $file
             fi
         done
     fi
