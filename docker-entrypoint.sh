@@ -4,7 +4,9 @@
 # environment variable, and use semicolon to separate them. This script
 # will catch all SUNKAISENS_ prefix environment variable and match it
 # in configuration files. e.g. 'SUNKAISENS_HELLO__ZHANG_XIANG_LONG' will
-# be converted to 'hello.zhang_xiang_long'. Borrowed from the emqx's
+# be converted to 'hello.zhang_xiang_long'. We use 'snake_case' by default,
+# if you set the VAR_CASE environment variable to 'CamelCase', that will
+# be converted to 'hello.zhangXiangLong'. Borrowed from the emqx's
 # docker-entrypoint.sh.
 #
 # In addition, you can add services that you want wait for to the WAIT_FOR_SERVICE
@@ -33,6 +35,15 @@ for var in $(env); do
     if [[ -n "$(echo $var | grep -E '^SUNKAISENS_')" ]]; then
         var_name=$(echo "$var" | sed -r "s/SUNKAISENS_([^=]*)=.*/\1/g" | tr '[:upper:]' '[:lower:]' | sed -r "s/__/\./g")
         var_full_name=$(echo "$var" | sed -r "s/([^=]*)=.*/\1/g")
+        case $VAR_CASE in
+        CamelCase)
+            var_name=$(echo "$var_name" | sed -r "s/_([^_])/\u\1/g")
+            ;;
+        snake_case)
+            ;;
+        *)
+            ;;
+        esac
 
         for file in ${file_array[@]}; do
             if [[ -n "$(cat $file | grep -E "^(^|^#*|^#*\s*)$var_name")" ]]; then
