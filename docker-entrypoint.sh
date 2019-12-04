@@ -1,21 +1,25 @@
 #!/bin/sh
 #
+# CONFIG(path1;path2)
 # You can add the path of configuration file or folder to the CONFIG
 # environment variable, and use semicolon to separate them. This script
 # will catch all SUNKAISENS_ prefix environment variable and match it
-# in configuration files. e.g. 'SUNKAISENS_HELLO__ZHANG_XIANG_LONG' will
+# in configuration files. e.g. 'SUNKAISENS_HELLO__ZHANG_XIANG_LONG' may
 # be converted to 'hello.zhang_xiang_long'. This is borrowed from the
 # emqx's docker-entrypoint.sh.
 #
-# We use 'snake_case' by default, if you set the VAR_CASE environment
+# VAR_CASE(CamelCase,snake_case,spinal-case,ignore-case,raw-case)
+# We use 'raw-case' by default, if you set the VAR_CASE environment
 # variable to 'CamelCase', that will be converted to 'hello.zhangXiangLong'.
 # Of course, we also support case-insensitive variable name matching by
 # setting VAR_CASE to 'ignore-case', but it is not recommended because you
 # need to ensure that the variable name is unique when the case is ignored.
 #
+# VAR_SEPARATOR('=' or ':')
 # VAR_SEPARATOR environment variable is used to separate the name and
 # value of variables, we use '=' by default, you can also use ':'.
 #
+# WAIT_FOR_SERVICE(IP1:Port1;IP2:Port2)
 # In addition, you can add services that you want wait for to the WAIT_FOR_SERVICE
 # environment variable, such as database service. This script will wait
 # for these services until they are available.
@@ -68,15 +72,22 @@ var_replace_i() {
 
 for var in $(env); do
     if [[ -n "$(echo $var | grep -E '^SUNKAISENS_')" ]]; then
-        var_name=$(echo "$var" | sed -r "s/SUNKAISENS_([^=]*)=.*/\1/g" | tr '[:upper:]' '[:lower:]' | sed -r "s/__/\./g")
+        var_name=$(echo "$var" | sed -r "s/SUNKAISENS_([^=]*)=.*/\1/g" | sed -r "s/__/\./g")
         var_full_name=$(echo "$var" | sed -r "s/([^=]*)=.*/\1/g")
         case $VAR_CASE in
-        ignore-case)
-            var_replace_i;;
         CamelCase)
-            var_name=$(echo "$var_name" | sed -r "s/_([^_])/\u\1/g")
+            var_name=$(echo "$var_name" | tr '[:upper:]' '[:lower:]' | sed -r "s/_([^_])/\u\1/g")
             var_replace;;
-        snake_case | *)
+        snake_case)
+            var_name=$(echo "$var_name" | tr '[:upper:]' '[:lower:]')
+            var_replace;;
+        spinal-case)
+            var_name=$(echo "$var_name" | tr '[:upper:]' '[:lower:]' | tr '_' '-')
+            var_replace;;
+        ignore-case)
+            var_name=$(echo "$var_name" | tr '[:upper:]' '[:lower:]')
+            var_replace_i;;
+        raw-case | *)
             var_replace;;
         esac
 
