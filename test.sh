@@ -21,8 +21,10 @@ echo "a.B_C=1" >> $CONFIG
 echo "a.bC=1"  >> $CONFIG
 echo "a.b-c=1" >> $CONFIG
 echo "A.B_C=1" >> $CONFIG
+echo "punct="  >> $CONFIG
 
 export SUNKAISENS_A__B_C=100
+export SUNKAISENS_PUNCT="~\`!@#$%^&*()_-+={}[]|\\:;\"'<>,.?/"
 
 ./docker-entrypoint.sh
 

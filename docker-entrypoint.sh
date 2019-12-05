@@ -56,7 +56,7 @@ var_replace() {
     for file in ${file_array[@]}; do
         if [[ -n "$(cat $file | grep -E "^(^|^#*|^#*\s*)$var_name")" ]]; then
             echo "$var_name${VAR_SEPARATOR}$(eval echo \$$var_full_name)"
-            echo "$(sed -r "s/(^#*\s*)($var_name)\s*${VAR_SEPARATOR}\s*(.*)/\2${VAR_SEPARATOR}$(eval echo \$$var_full_name | sed -e 's/\//\\\//g')/g" $file)" > $file
+            echo "$(sed -r "s/(^#*\s*)($var_name)\s*${VAR_SEPARATOR}\s*(.*)/\2${VAR_SEPARATOR}$(eval echo \$$var_full_name | sed 's/[[:punct:]]/\\&/g')/g" $file)" > $file
         fi
     done
 }
@@ -65,7 +65,7 @@ var_replace_i() {
     for file in ${file_array[@]}; do
         if [[ -n "$(cat $file | grep -i -E "^(^|^#*|^#*\s*)$var_name")" ]]; then
             echo "$var_name${VAR_SEPARATOR}$(eval echo \$$var_full_name)"
-            echo "$(sed -r "s/(^#*\s*)($var_name)\s*${VAR_SEPARATOR}\s*(.*)/\2${VAR_SEPARATOR}$(eval echo \$$var_full_name | sed -e 's/\//\\\//g')/gI" $file)" > $file
+            echo "$(sed -r "s/(^#*\s*)($var_name)\s*${VAR_SEPARATOR}\s*(.*)/\2${VAR_SEPARATOR}$(eval echo \$$var_full_name | sed 's/[[:punct:]]/\\&/g')/gI" $file)" > $file
         fi
     done
 }
