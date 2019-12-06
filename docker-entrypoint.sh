@@ -34,8 +34,7 @@ case $VAR_SEPARATOR in
 =)
     ;;
 *)
-    VAR_SEPARATOR="="
-    ;;
+    VAR_SEPARATOR="=";;
 esac
 
 array=(${CONFIG//;/ })
@@ -90,7 +89,6 @@ for var in $(env); do
         raw-case | *)
             var_replace;;
         esac
-
     fi
 done
 
