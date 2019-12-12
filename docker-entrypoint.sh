@@ -97,7 +97,7 @@ done
 if [[ -n "$WAIT_FOR_SERVICE" ]]; then
     serv_array=(${WAIT_FOR_SERVICE//;/ })
     for serv in ${serv_array[@]}; do
-        ./wait-for-it.sh -t 0 $serv
+        wait-for-it.sh -t 0 $serv
     done
 fi
 
