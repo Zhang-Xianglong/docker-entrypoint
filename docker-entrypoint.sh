@@ -19,7 +19,7 @@
 # VAR_SEPARATOR environment variable is used to separate the name and
 # value of variables, we use '=' by default, you can also use ':'.
 #
-# WAIT_FOR_SERVICE(IP1:Port1;IP2:Port2)
+# WAIT_FOR_SERVICE(IP1[:Port1];IP2[:Port2])
 # In addition, you can add services that you want wait for to the WAIT_FOR_SERVICE
 # environment variable, such as database service. This script will wait
 # for these services until they are available.
@@ -97,7 +97,25 @@ done
 if [[ -n "$WAIT_FOR_SERVICE" ]]; then
     serv_array=(${WAIT_FOR_SERVICE//;/ })
     for serv in ${serv_array[@]}; do
-        wait-for-it.sh -t 0 $serv
+        serv_addr=(${serv//:/ })
+        serv_host=${serv_addr[0]}
+        serv_port=${serv_addr[1]}
+        case ${#serv_addr[*]} in
+        1)
+            until host $serv_host; do
+                sleep 3
+            done
+            echo "$serv_host OK.";;
+        2)
+            until host $serv_host; do
+                sleep 3
+            done
+            echo "$serv_host OK."
+
+            wait-for-it.sh -t 0 $serv;;
+        *)
+            ;;
+        esac
     done
 fi
 
